@@ -3,24 +3,32 @@ using System.Text;
 using RayTrack;
 using Color = System.Numerics.Vector3;
 
-static bool HitSphere(Vector3 center, float r, Ray ray)
+static float HitSphere(Vector3 center, float r, Ray ray)
 {
     Vector3 oc = center - ray.orig;
     var a = Vector3.Dot(ray.dir, ray.dir);
     var b = -2.0f * Vector3.Dot(ray.dir, oc);
     var c = Vector3.Dot(oc, oc) - r * r;
     var discriminant = b * b - 4 * a * c;
-    return discriminant > 0;
+    if (discriminant < 0)
+    {
+        return -1;
+    }
+    return -b - MathF.Sqrt(discriminant) / 2.0f * a;
 }
 
 
 
 static Color RayColor(Ray r)
 {
-    if (HitSphere(new Vector3(0, 0, -1), 0.5f, r))
+    var t = (HitSphere(new Vector3(0, 0, -1), 0.5f, r));
+    if (t > 0)
     {
-        return new Color(1, 0, 0);
+        Vector3 n = r.At(t) - new Vector3(0, 0, -1);
+        Vector3 result = n / n.Length();
+        return 0.5f * (new Color(result.X + 1, result.Y + 1, result.Z + 1));
     }
+        
     Vector3 unitDir = r.dir / r.dir.Length();
     float a = 0.5f * (unitDir.Y + 1.0f);
 
